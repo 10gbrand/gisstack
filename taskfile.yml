@@ -1,0 +1,23 @@
+version: '3'
+
+tasks:
+  up:
+    desc: "Start Docker containers in detached mode using docker-compose"
+    cmds:
+      - docker-compose up -d
+
+  down:
+    desc: "Stop and remove Docker containers using docker-compose"
+    cmds:
+      - docker-compose down
+
+  logs:
+    desc: "View and follow logs of running Docker containers"
+    cmds:
+      - docker-compose logs -f
+
+  restart:
+    desc: "Restart the Docker containers (down and up)"
+    cmds:
+      - task down
+      - task up

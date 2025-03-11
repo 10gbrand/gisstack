@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PostGIS Vector Tiles Demo</title>
+    <script src='https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css' rel='stylesheet' />
+    <style>
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://demotiles.maplibre.org/style.json',
+            center: [0, 0],
+            zoom: 1
+        });
+
+        map.on('load', () => {
+            map.addSource('postgis-tiles', {
+                type: 'vector',
+                url: 'http://localhost:7800/public.ne_50m_admin_0_countries.json'
+            });
+            
+            map.addLayer({
+                id: 'countries',
+                type: 'fill',
+                source: 'postgis-tiles',
+                'source-layer': 'public.ne_50m_admin_0_countries',
+                paint: {
+                    'fill-color': '#888888',
+                    'fill-opacity': 0.4
+                }
+            });
+        });
+    </script>
+</body>
+</html>

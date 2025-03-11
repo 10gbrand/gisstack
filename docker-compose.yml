@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgis:
+    image: postgis/postgis:16-3.4-alpine
+    platform: linux/arm64
+    container_name: postgis
+    environment:
+      POSTGRES_DB: gis
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    networks:
+      - gis-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d gis"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pg-tileserv:
+    image: pramsey/pg_tileserv:latest
+    platform: linux/arm64
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgres://user:password@postgis:5432/gis"
+    ports:
+      - "7800:7800"
+    networks:
+      - gis-network
+
+  pg-featureserv:
+    image: pramsey/pg_featureserv:latest
+    platform: linux/arm64
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgres://user:password@postgis:5432/gis"
+    ports:
+      - "9000:9000"
+    networks:
+      - gis-network
+
+  maplibre-web:
+    image: nginx:alpine
+    platform: linux/arm64
+    ports:
+      - "8080:80"
+    volumes:
+      - ./maplibre:/usr/share/nginx/html
+    networks:
+      - gis-network
+
+volumes:
+  postgis_data:
+
+networks:
+  gis-network:
+    driver: bridge
